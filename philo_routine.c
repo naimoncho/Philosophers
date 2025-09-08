@@ -48,6 +48,7 @@ void	drop_forks(t_philo *philo)
 void	*philo_routine(void *arg)
 {
 	t_philo *ph;
+	int	first;
 
 	ph = (t_philo *)arg;
 	if (ph->table->num_philo == 1)
@@ -60,11 +61,21 @@ void	*philo_routine(void *arg)
 	}
 	if (ph->id % 2 == 0)
 		usleep(1000);
+	first = 1;
 	while (!sim_stopped(ph->table))
 	{
-		print_action(ph, "is thinking");
-		take_forks(ph);
-		act_eat_sleep(ph);
+		if (first)
+		{
+			take_forks(ph);
+			act_eat_sleep(ph);
+			first = 0;
+		}
+		else
+		{
+			print_action(ph, "is thinking");
+			take_forks(ph);
+			act_eat_sleep(ph);
+		}	
 	}
 	return (NULL);
 }

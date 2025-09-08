@@ -47,6 +47,8 @@ struct s_table
 };
 
 long	ft_atol(char *str);
+void	ft_putstr_fd(char *s, int fd);
+int		ft_isdigit(int c);
 int		is_valid_number(char *s);
 long	get_time_ms(void);
 void	print_action(t_philo *philo, char *text);

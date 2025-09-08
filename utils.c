@@ -25,3 +25,29 @@ long	get_time_ms(void)
 	ms = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 	return (ms);
 }
+
+int	sim_stopped(t_table *table)
+{
+	int	sim;
+
+	pthread_mutex_lock(&table->sim_mutex);
+	sim = table->stop_sim;
+	pthread_mutex_unlock(&table->sim_mutex);
+	return (sim);
+}
+
+void	stop_simulation(t_table *table)
+{
+	pthread_mutex_lock(&table->sim_mutex);
+	table->stop_sim = 1;
+	pthread_mutex_unlock(&table->sim_mutex);
+}
+
+void	ft_usleep(t_table *table, long ms)
+{
+	long	end;
+
+	end = get_time_ms() + ms;
+	while (!sim_stopped(table) && get_time_ms() < end)
+		usleep(200);
+}

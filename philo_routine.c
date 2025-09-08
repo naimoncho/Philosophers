@@ -3,8 +3,9 @@
 void	print_action(t_philo *philo, char *text)
 {
 	long	timestamp;
+
 	pthread_mutex_lock(&philo->table->write_mutex);
-	if (!philo->table->stop_sim)
+	if (!sim_stopped(philo->table))
 	{
 		timestamp = get_time_ms() - philo->table->start_time;
 		printf("%ld %d %s\n", timestamp, philo->id, text);
@@ -14,17 +15,34 @@ void	print_action(t_philo *philo, char *text)
 
 void	take_forks(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->left_fork->mutex);
-	print_action(philo, "has taken a fork");
-
-	pthread_mutex_lock(&philo->right_fork->mutex);
-	print_action(philo, "has taken a fork");
+	if (philo->id % 2 == 0)
+	{
+		pthread_mutex_lock(&philo->right_fork->mutex);
+		print_action(philo, "has taken a fork");
+		pthread_mutex_lock(&philo->left_fork->mutex);
+		print_action(philo, "has taken a fork");
+	}
+	else
+	{
+		pthread_mutex_lock(&philo->left_fork->mutex);
+		print_action(philo, "has taken a fork");
+		pthread_mutex_lock(&philo->right_fork->mutex);
+		print_action(philo, "has taken a fork");
+	}
 }
 
 void	drop_forks(t_philo *philo)
 {
-	pthread_mutex_unlock(&philo->left_fork->mutex);
-	pthread_mutex_unlock(&philo->right_fork->mutex);
+	if (philo->id % 2 == 0)
+	{
+		pthread_mutex_unlock(&philo->left_fork->mutex);
+		pthread_mutex_unlock(&philo->right_fork->mutex);
+	}
+	else 
+	{
+		pthread_mutex_unlock(&philo->right_fork->mutex);
+		pthread_mutex_unlock(&philo->left_fork->mutex);
+	}
 }
 
 void	*philo_routine(void *arg)
@@ -32,23 +50,21 @@ void	*philo_routine(void *arg)
 	t_philo *ph;
 
 	ph = (t_philo *)arg;
+	if (ph->table->num_philo == 1)
+	{
+		pthread_mutex_lock(&ph->left_fork->mutex);
+		print_action(ph, "has taken a fork");
+		ft_usleep(ph->table, ph->table->die_time);
+		pthread_mutex_unlock(&ph->left_fork->mutex);
+		return (NULL);
+	}
 	if (ph->id % 2 == 0)
 		usleep(1000);
-	while (!ph->table->stop_sim)
+	while (!sim_stopped(ph->table))
 	{
 		print_action(ph, "is thinking");
 		take_forks(ph);
-		pthread_mutex_lock(&ph->table->sim_mutex);
-		ph->time_last_meal = get_time_ms();
-		pthread_mutex_unlock(&ph->table->sim_mutex);
-		print_action(ph, "is eating");
-		usleep(ph->table->eat_time * 1000);
-		ph->meals_eaten++;
-		if (ph->table->limit_meals != -1 && ph->meals_eaten >= ph->table->limit_meals)
-		ph->is_full = true;
-		drop_forks(ph);
-		print_action(ph, "is sleeping");
-		usleep(ph->table->sleep_time * 1000);
+		act_eat_sleep(ph);
 	}
 	return (NULL);
 }
@@ -56,25 +72,28 @@ void	*philo_routine(void *arg)
 void	*monitoring_philo(void *arg)
 {
 	t_table	*tb;
-	int	i;
+	int		i;
+	int		full_count;
+	int		r;
+	long	now;
 
 	tb = (t_table *)arg;
-	while(!tb->stop_sim)
+	while (!sim_stopped(tb))
 	{
+		full_count = 0;
+		now = get_time_ms();
 		i = 0;
 		while (i < tb->num_philo)
 		{
-			pthread_mutex_lock(&tb->sim_mutex);
-			if (!tb->philos[i].is_full && get_time_ms() - tb->philos[i].time_last_meal > tb->die_time)
-			{
-				tb->stop_sim = 1;
-				print_action(&tb->philos[i], "died");
-				pthread_mutex_unlock(&tb->sim_mutex);
+			r = check_and_maybe_die(tb, i, now);
+			if (r == 1)
 				return (NULL);
-			}
-			pthread_mutex_unlock(&tb->sim_mutex);
+			if (r == 2)
+				full_count++;
 			i++;
 		}
+		if (tb->limit_meals != -1 && full_count == tb->num_philo)
+			return (stop_simulation(tb), NULL);
 		usleep(1000);
 	}
 	return (NULL);

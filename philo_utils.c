@@ -80,10 +80,23 @@ int	init_simulation(t_table *table)
 
 void	start_simulation(t_table *table)
 {
-	int	i;
+	int			i;
+	pthread_t	monitor;
 
 	table->start_time = get_time_ms();
 	i = 0;
 	while (i < table->num_philo)
+	{
+		table->philos[i].time_last_meal = table->start_time;
 		pthread_create(&table->philos[i].id_thread, NULL, philo_routine, &table->philos[i]);
+		i++;
+	}
+	pthread_create(&monitor, NULL, monitoring_philo, table);
+	pthread_join(monitor, NULL);
+	i = 0;
+	while (i < table->num_philo)
+	{
+		pthread_join(table->philos[i].id_thread, NULL);
+		i++;
+	}
 }

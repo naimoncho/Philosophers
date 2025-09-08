@@ -54,5 +54,15 @@ void	take_forks(t_philo *philo);
 void	drop_forks(t_philo *philo);
 void	*philo_routine(void *arg);
 void	*monitoring_philo(void *arg);
+void	print_death(t_philo *p);
+void	ft_usleep(t_table *table, long ms);
+void	stop_simulation(t_table *table);
+int		sim_stopped(t_table *table);
+void	act_eat_sleep(t_philo *ph);
+int		check_and_maybe_die(t_table *tb, int i, long now);
+int		parse_arguments(int ac, char **av, t_table *table);
+int		init_simulation(t_table *table);
+void	start_simulation(t_table *table);
+void	cleanup_simulation(t_table *t);
 
 #endif

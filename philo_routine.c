@@ -33,22 +33,13 @@ void	take_forks(t_philo *philo)
 
 void	drop_forks(t_philo *philo)
 {
-	if (philo->id % 2 == 0)
-	{
-		pthread_mutex_unlock(&philo->left_fork->mutex);
-		pthread_mutex_unlock(&philo->right_fork->mutex);
-	}
-	else 
-	{
-		pthread_mutex_unlock(&philo->right_fork->mutex);
-		pthread_mutex_unlock(&philo->left_fork->mutex);
-	}
+	pthread_mutex_unlock(&philo->left_fork->mutex);
+	pthread_mutex_unlock(&philo->right_fork->mutex);
 }
 
 void	*philo_routine(void *arg)
 {
 	t_philo *ph;
-	int	first;
 
 	ph = (t_philo *)arg;
 	if (ph->table->num_philo == 1)
@@ -60,52 +51,42 @@ void	*philo_routine(void *arg)
 		return (NULL);
 	}
 	if (ph->id % 2 == 0)
-		usleep(1000);
-	first = 1;
+		ft_usleep(ph->table, 1);
 	while (!sim_stopped(ph->table))
 	{
-		if (first)
-		{
-			take_forks(ph);
-			act_eat_sleep(ph);
-			first = 0;
-		}
-		else
-		{
-			print_action(ph, "is thinking");
-			take_forks(ph);
-			act_eat_sleep(ph);
-		}	
+		take_forks(ph);
+		act_eat_sleep(ph);	
+		print_action(ph, "is thinking");
+		ft_usleep(ph->table, 1);
 	}
 	return (NULL);
 }
 
 void	*monitoring_philo(void *arg)
 {
-	t_table	*tb;
+	t_table	*table;
 	int		i;
 	int		full_count;
 	int		r;
 	long	now;
 
-	tb = (t_table *)arg;
-	while (!sim_stopped(tb))
+	table = (t_table *)arg;
+	while (!sim_stopped(table))
 	{
 		full_count = 0;
 		now = get_time_ms();
 		i = 0;
-		while (i < tb->num_philo)
+		while (i < table->num_philo)
 		{
-			r = check_and_maybe_die(tb, i, now);
+			r = check_and_maybe_die(table, i, now);
 			if (r == 1)
 				return (NULL);
 			if (r == 2)
 				full_count++;
 			i++;
 		}
-		if (tb->limit_meals != -1 && full_count == tb->num_philo)
-			return (stop_simulation(tb), NULL);
-		usleep(1000);
+		if (table->limit_meals != -1 && full_count == table->num_philo)
+			return (stop_simulation(table), NULL);
 	}
 	return (NULL);
 }

@@ -45,9 +45,13 @@ void	stop_simulation(t_table *table)
 
 void	ft_usleep(t_table *table, long ms)
 {
-	long	end;
-
-	end = get_time_ms() + ms;
-	while (!sim_stopped(table) && get_time_ms() < end)
-		usleep(200);
+	long	start;
+	
+	start = get_time_ms();
+	while (!sim_stopped(table))
+	{
+		if (get_time_ms() - start >= ms)
+			break;
+		usleep(500);
+	}
 }

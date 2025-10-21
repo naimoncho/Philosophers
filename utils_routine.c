@@ -16,22 +16,26 @@ void	act_eat_sleep(t_philo *ph)
 	ft_usleep(ph->table, ph->table->sleep_time);
 }
 
-int	check_and_maybe_die(t_table *tb, int i, long now)
+// VERSIÓN BUENA
+int check_and_maybe_die(t_table *tb, int i, long now)
 {
-	long	last;
-	bool	full;
+    long last_meal;
+    bool is_full;
 
-	pthread_mutex_lock(&tb->sim_mutex);
-	last = tb->philos[i].time_last_meal;
-	full = tb->philos[i].is_full;
-	pthread_mutex_unlock(&tb->sim_mutex);
-	if (!full && (now - last > tb->die_time))
-	{
-		print_death(&tb->philos[i]);
-		stop_simulation(tb);
-		return (1);
-	}
-	if (full)
-		return (2);
-	return (0);
+    // Entramos en la sección crítica solo para leer los datos de forma segura
+    pthread_mutex_lock(&tb->philos[i].meal_mutex);
+    last_meal = tb->philos[i].time_last_meal;
+    is_full = tb->philos[i].is_full;
+    pthread_mutex_unlock(&tb->philos[i].meal_mutex); // <<< ¡Soltamos el mutex INMEDIATAMENTE!
+
+    // Ahora que estamos fuera de la sección crítica, podemos tomar decisiones y llamar a otras funciones
+    if (!is_full && (now - last_meal > tb->die_time))
+    {
+        print_death(&tb->philos[i]); // Esto ya no causa deadlock
+        stop_simulation(tb);
+        return (1); // Murió
+    }
+    if (is_full)
+        return (2); // Lleno
+    return (0); // Sigue vivo
 }

@@ -29,6 +29,7 @@ typedef struct 	s_philo
 	t_fork		*left_fork;
 	pthread_t	id_thread;
 	t_table		*table;
+	pthread_mutex_t	meal_mutex;
 }				t_philo;
 
 struct s_table

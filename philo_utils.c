@@ -48,6 +48,7 @@ static int	init_mutexes(t_table *table)
 static void	init_philos(t_table *table)
 {
 	int	i;
+	
 	i = 0;
 	while (i < table->num_philo)
 	{
@@ -92,11 +93,11 @@ void	start_simulation(t_table *table)
 		i++;
 	}
 	pthread_create(&monitor, NULL, monitoring_philo, table);
-	pthread_join(monitor, NULL);
 	i = 0;
 	while (i < table->num_philo)
 	{
 		pthread_join(table->philos[i].id_thread, NULL);
 		i++;
 	}
+	pthread_join(monitor, NULL);
 }

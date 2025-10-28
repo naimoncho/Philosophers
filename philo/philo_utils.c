@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_utils.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ncheniou <ncheniou@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/21 16:28:57 by ncheniou          #+#    #+#             */
+/*   Updated: 2025/10/22 13:11:34 by ncheniou         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 int	parse_arguments(int ac, char **av, t_table *table)
@@ -39,6 +51,7 @@ static int	init_mutexes(t_table *table)
 	while (i < table->num_philo)
 	{
 		pthread_mutex_init(&table->forks[i].mutex, NULL);
+		pthread_mutex_init(&table->philos[i].meal_mutex, NULL);
 		table->forks[i].id = i;
 		i++;
 	}
@@ -48,7 +61,7 @@ static int	init_mutexes(t_table *table)
 static void	init_philos(t_table *table)
 {
 	int	i;
-	
+
 	i = 0;
 	while (i < table->num_philo)
 	{
@@ -68,7 +81,7 @@ int	init_simulation(t_table *table)
 	table->forks = malloc(sizeof(t_fork) * table->num_philo);
 	table->philos = malloc(sizeof(t_philo) * table->num_philo);
 	if (!table->forks || !table->philos)
-		return (printf("Error: malloc failed machote\n"), 0);
+		return (printf("Error: malloc failed\n"), 0);
 	if (!init_mutexes(table))
 	{
 		free(table->forks);
@@ -89,7 +102,8 @@ void	start_simulation(t_table *table)
 	while (i < table->num_philo)
 	{
 		table->philos[i].time_last_meal = table->start_time;
-		pthread_create(&table->philos[i].id_thread, NULL, philo_routine, &table->philos[i]);
+		pthread_create(&table->philos[i].id_thread,
+			NULL, philo_routine, &table->philos[i]);
 		i++;
 	}
 	pthread_create(&monitor, NULL, monitoring_philo, table);

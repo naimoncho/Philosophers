@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_routine.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ncheniou <ncheniou@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/21 16:29:09 by ncheniou          #+#    #+#             */
+/*   Updated: 2025/10/21 16:29:10 by ncheniou         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 void	print_action(t_philo *philo, char *text)
@@ -39,7 +51,7 @@ void	drop_forks(t_philo *philo)
 
 void	*philo_routine(void *arg)
 {
-	t_philo *ph;
+	t_philo	*ph;
 
 	ph = (t_philo *)arg;
 	if (ph->table->num_philo == 1)
@@ -55,7 +67,7 @@ void	*philo_routine(void *arg)
 	while (!sim_stopped(ph->table))
 	{
 		take_forks(ph);
-		act_eat_sleep(ph);	
+		act_eat_sleep(ph);
 		print_action(ph, "is thinking");
 		ft_usleep(ph->table, 1);
 	}

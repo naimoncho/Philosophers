@@ -114,6 +114,4 @@ En todos los casos se muestra un mensaje de error claro, se liberan los recursos
 Proyecto desarrollado por **ncheniou**  
 Como parte del **Common Core de 42**.
 
-Este proyecto me ha permitido profundizar en la programación concurrente, la sincronización de threads y la gestión correcta de recursos compartidos.
-
 Este proyecto me ha permitido profundizar en la programación concurrente, entendiendo cómo sincronizar múltiples threads, proteger recursos compartidos y evitar problemas clásicos como *deadlocks* y *race conditions*.

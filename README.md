@@ -34,6 +34,8 @@ El objetivo de este proyecto es crear una simulación que:
 ```bash
 ./philo number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]
 
+---
+
 ## 🧠 Funcionamiento interno
 
 Cada filósofo está representado por un **thread independiente** que ejecuta una rutina cíclica compuesta por las siguientes acciones:
